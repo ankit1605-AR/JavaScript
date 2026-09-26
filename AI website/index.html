@@ -1,0 +1,186 @@
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import StampBadge from '../components/StampBadge.jsx';
+import ProductGallery from '../components/ProductGallery.jsx';
+import ColorSelector from '../components/ColorSelector.jsx';
+import SizeSelector from '../components/SizeSelector.jsx';
+import QuantityStepper from '../components/QuantityStepper.jsx';
+import { useProduct } from '../hooks/useProduct.js';
+import { useCart } from '../context/CartContext.jsx';
+import { validateSizeSelection } from '../utils/validation.js';
+
+export default function ProductDetailPage() {
+  const { productId } = useParams();
+  const { product, isLoading, isDemoData } = useProduct(productId);
+  const { addItem } = useCart();
+
+  const [selectedColorId, setSelectedColorId] = useState(null);
+  const [selectedSizeId, setSelectedSizeId] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [sizeError, setSizeError] = useState(null);
+  const [justAdded, setJustAdded] = useState(false);
+
+  // Reset per-product selection state whenever the visited product changes.
+  useEffect(() => {
+    setSelectedColorId(null);
+    setSelectedSizeId(null);
+    setQuantity(1);
+    setSizeError(null);
+    setJustAdded(false);
+  }, [productId]);
+
+  // Products with exactly one size option (e.g. "One Size") don't need the
+  // customer to make a choice — pick it for them.
+  useEffect(() => {
+    if (product && product.sizes.length === 1) {
+      setSelectedSizeId(product.sizes[0].id);
+    }
+  }, [product]);
+
+  const activeColorId = selectedColorId ?? product?.colors?.[0]?.id ?? null;
+
+  const selectedColor = useMemo(
+    () => product?.colors?.find((color) => color.id === activeColorId),
+    [product, activeColorId]
+  );
+  const selectedSize = useMemo(
+    () => product?.sizes?.find((size) => size.id === selectedSizeId),
+    [product, selectedSizeId]
+  );
+
+  if (isLoading) {
+    return (
+      <main className="loading-state" aria-live="polite">
+        Loading catalog page…
+      </main>
+    );
+  }
+
+  if (!product) {
+    return (
+      <main className="empty-state">
+        <h2>We couldn&rsquo;t find that item.</h2>
+        <Link to="/" className="btn btn--primary">
+          Back to the catalog
+        </Link>
+      </main>
+    );
+  }
+
+  const totalPrice = product.price * quantity;
+
+  function handleAddToBag() {
+    const error = validateSizeSelection(selectedSizeId);
+    if (error) {
+      setSizeError(error);
+      return;
+    }
+    setSizeError(null);
+
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      currency: product.currency,
+      colorId: selectedColor?.id ?? 'default',
+      colorLabel: selectedColor?.label ?? '',
+      colorHex: selectedColor?.hex ?? '#c6a15b',
+      sizeId: selectedSizeId,
+      sizeLabel: selectedSize?.label ?? '',
+      quantity,
+    });
+
+    setJustAdded(true);
+  }
+
+  return (
+    <main>
+      {isDemoData ? (
+        <p className="demo-banner" role="note">
+          Demo mode: showing sample catalog data. Connect Firebase (see README) to load your own
+          product from Firestore.
+        </p>
+      ) : null}
+
+      <Link to="/" className="back-link">
+        &larr; Back to catalog
+      </Link>
+
+      <div className="product-layout">
+        <ProductGallery images={product.images} productName={product.name} />
+
+        <section className="product-details" aria-labelledby="product-title">
+          <StampBadge text={product.stampText} />
+
+          <p className="product-details__tagline">{product.tagline}</p>
+          <h2 className="product-details__title" id="product-title">
+            {product.name}
+          </h2>
+
+          <div className="price-row">
+            <span className="price-row__current">${product.price.toFixed(2)}</span>
+            {product.compareAtPrice ? (
+              <span className="price-row__compare">${product.compareAtPrice.toFixed(2)}</span>
+            ) : null}
+          </div>
+
+          <p className="product-details__description">{product.description}</p>
+
+          <ul className="detail-list">
+            {product.details.map((detail) => (
+              <li key={detail}>{detail}</li>
+            ))}
+          </ul>
+
+          <div className="options-panel">
+            <ColorSelector
+              colors={product.colors}
+              selectedColorId={activeColorId}
+              onSelect={setSelectedColorId}
+            />
+
+            <SizeSelector
+              sizes={product.sizes}
+              selectedSizeId={selectedSizeId}
+              onSelect={(sizeId) => {
+                setSelectedSizeId(sizeId);
+                setSizeError(null);
+                setJustAdded(false);
+              }}
+              error={sizeError}
+            />
+
+            <QuantityStepper
+              quantity={quantity}
+              onChange={(nextQuantity) => {
+                setQuantity(nextQuantity);
+                setJustAdded(false);
+              }}
+            />
+          </div>
+
+          {justAdded ? (
+            <div className="added-confirmation" role="status">
+              <p>
+                Added {quantity} to your bag &mdash; {selectedColor?.label}, size{' '}
+                {selectedSize?.label}.
+              </p>
+              <div className="added-confirmation__actions">
+                <Link to="/cart" className="btn btn--primary">
+                  View bag
+                </Link>
+                <button type="button" className="btn btn--ghost" onClick={() => setJustAdded(false)}>
+                  Keep shopping
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" className="btn btn--primary btn--block" onClick={handleAddToBag}>
+              Add to bag — ${totalPrice.toFixed(2)}
+            </button>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}

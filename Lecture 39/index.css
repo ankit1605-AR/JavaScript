@@ -1,0 +1,25 @@
+
+
+.random{
+    background-color: purple;
+    font-size: 30px;
+    font-style: italic;
+}
+.singleProduct{
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+    width: 300px;
+    background-color: rgb(161, 218, 228);
+    justify-content: center;
+    padding: 40px;
+    margin: 30px;
+    border:1px solid rgb(214, 21, 21) ;
+}
+.singleProduct img{
+    width:70%;
+}
+.productDetail{
+    display: flex;
+    justify-content: space-around;
+}

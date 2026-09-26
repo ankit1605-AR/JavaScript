@@ -1,0 +1,43 @@
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Accepts 5-digit or ZIP+4 US postal codes, e.g. "94103" or "94103-1234".
+const ZIP_PATTERN = /^\d{5}(-\d{4})?$/;
+
+export function validateOrderForm(values) {
+  const errors = {};
+
+  if (!values.fullName.trim()) {
+    errors.fullName = 'Enter the name that should go on the order.';
+  } else if (values.fullName.trim().length < 2) {
+    errors.fullName = 'That name looks too short — double check it.';
+  }
+
+  if (!values.email.trim()) {
+    errors.email = "We'll need an email to send your confirmation.";
+  } else if (!EMAIL_PATTERN.test(values.email.trim())) {
+    errors.email = 'That email address doesn\u2019t look right.';
+  }
+
+  if (!values.address.trim()) {
+    errors.address = 'Enter a shipping address.';
+  }
+
+  if (!values.city.trim()) {
+    errors.city = 'Enter a city.';
+  }
+
+  if (!values.zip.trim()) {
+    errors.zip = 'Enter a ZIP code.';
+  } else if (!ZIP_PATTERN.test(values.zip.trim())) {
+    errors.zip = 'Use a 5-digit ZIP, like 94103.';
+  }
+
+  return errors;
+}
+
+export function validateSizeSelection(sizeId) {
+  return sizeId ? null : 'Please select a size before adding to bag.';
+}
+
+export function hasErrors(errors) {
+  return Object.keys(errors).length > 0;
+}

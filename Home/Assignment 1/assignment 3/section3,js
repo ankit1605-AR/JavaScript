@@ -1,0 +1,11 @@
+let num=12.456786;
+// console.log(num.toFixed(2));
+let num1=99.5;
+// console.log(num1.toFixed(2));
+
+let date = new Date();
+console.log(date.getDate());
+console.log(date.getDay());
+console.log(date.toLocaleDateString());
+console.log(date.toLocaleTimeString());
+console.log(Date.now());

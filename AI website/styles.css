@@ -1,0 +1,46 @@
+import { useState } from 'react';
+
+const PLATE_PALETTE = ['#C6A15B', '#8A6A3E', '#40352A'];
+
+// Renders illustrated "plates" (no external image assets) so the demo
+// works offline and every teammate sees the same thing. Swap the
+// <div className="gallery__plate"> body for a real <img> once product
+// photography exists — the markup and keyboard behavior stay the same.
+export default function ProductGallery({ images, productName }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeImage = images[activeIndex];
+
+  return (
+    <div className="gallery">
+      <div className="gallery__stage">
+        <div
+          className="gallery__plate"
+          style={{ background: PLATE_PALETTE[activeIndex % PLATE_PALETTE.length] }}
+        >
+          <span className="gallery__plate-label">{activeImage.label}</span>
+        </div>
+        <span className="gallery__corner" aria-hidden="true" />
+      </div>
+
+      <div className="gallery__thumbs" role="tablist" aria-label={`${productName} views`}>
+        {images.map((image, index) => (
+          <button
+            key={image.id}
+            type="button"
+            role="tab"
+            aria-selected={index === activeIndex}
+            aria-label={image.label}
+            className={`gallery__thumb ${index === activeIndex ? 'is-active' : ''}`}
+            onClick={() => setActiveIndex(index)}
+          >
+            <span
+              className="gallery__thumb-swatch"
+              style={{ background: PLATE_PALETTE[index % PLATE_PALETTE.length] }}
+            />
+            {index + 1}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,50 @@
+import { Link } from 'react-router-dom';
+import CartLineItem from '../components/CartLineItem.jsx';
+import { useCart } from '../context/CartContext.jsx';
+
+export default function CartPage() {
+  const { lines, subtotal, updateQuantity, removeItem } = useCart();
+
+  if (lines.length === 0) {
+    return (
+      <main className="empty-state">
+        <h2>Your bag is empty.</h2>
+        <p>Add something from the catalog to see it here.</p>
+        <Link to="/" className="btn btn--primary">
+          Browse the catalog
+        </Link>
+      </main>
+    );
+  }
+
+  return (
+    <main>
+      <h2 className="page-title">Your Bag</h2>
+
+      <div className="cart-list">
+        {lines.map((line) => (
+          <CartLineItem
+            key={line.key}
+            line={line}
+            onUpdateQuantity={updateQuantity}
+            onRemove={removeItem}
+          />
+        ))}
+      </div>
+
+      <div className="cart-summary">
+        <div className="cart-summary__row">
+          <span>Subtotal</span>
+          <span>${subtotal.toFixed(2)}</span>
+        </div>
+        <p className="cart-summary__note">Shipping and taxes calculated at checkout.</p>
+        <Link to="/checkout" className="btn btn--primary btn--block">
+          Proceed to checkout
+        </Link>
+        <Link to="/" className="btn btn--ghost btn--block">
+          Continue shopping
+        </Link>
+      </div>
+    </main>
+  );
+}

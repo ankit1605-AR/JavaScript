@@ -1,0 +1,28 @@
+
+/* .hidden{
+    display: none;
+} */
+
+/* .reveal{
+    display: block;
+} */
+
+
+.singleProduct{
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+    width: 300px;
+    background-color: rgb(188, 245, 217);
+    justify-content: center;
+    padding: 40px;
+    margin: 30px;
+    border:1px solid rgb(214, 21, 21) ;
+}
+.singleProduct img{
+    width:70%;
+}
+.productDetail{
+    display: flex;
+    justify-content: space-around;
+}
